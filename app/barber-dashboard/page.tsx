@@ -6,6 +6,8 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { db } from "@/lib/firebase" // Ensure this import points to your Firebase configuration
+import { collection, addDoc } from "firebase/firestore"
 
 // Mock appointment data (replace with actual data fetching logic)
 const mockAppointments = [
@@ -20,11 +22,11 @@ export default function BarberDashboardPage() {
   const [offerTitle, setOfferTitle] = useState('')
   const [offerDescription, setOfferDescription] = useState('')
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/barber-login')
-    }
-  }, [user, router])
+  // useEffect(() => {
+  //   if (!user) {
+  //     router.push('/barber-login')
+  //   }
+  // }, [user, router])
 
   const handleLogout = async () => {
     try {
@@ -35,17 +37,21 @@ export default function BarberDashboardPage() {
     }
   }
 
-  const handleOfferSubmit = (e: React.FormEvent) => {
+  const handleOfferSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement logic to save and distribute the offer
-    console.log('Offer submitted:', { offerTitle, offerDescription })
-    // Reset form
-    setOfferTitle('')
-    setOfferDescription('')
-  }
-
-  if (!user) {
-    return null // or a loading spinner
+    try {
+      const docRef = await addDoc(collection(db, "promotions"), {
+        title: offerTitle,
+        description: offerDescription,
+        createdAt: new Date(),
+        barberId: user?.email
+      })
+      // Reset form
+      setOfferTitle('')
+      setOfferDescription('')
+    } catch (error) {
+      console.error("Error adding offer: ", error)
+    }
   }
 
   return (
@@ -55,7 +61,9 @@ export default function BarberDashboardPage() {
         <Button onClick={handleLogout}>Log out</Button>
       </div>
 
-      <p className="mb-6">Welcome, {user.email}</p>
+      <p className="mb-6">
+        Welcome, {user ? user.email : 'Guest'}
+      </p>
 
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Upcoming Appointments</h2>

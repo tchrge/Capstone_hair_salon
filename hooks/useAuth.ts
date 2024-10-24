@@ -4,11 +4,12 @@ import { signInWithEmailAndPassword, signOut, User } from 'firebase/auth';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      console.log("Auth state changed:", user ? "User logged in" : "User logged out")
-      setUser(user)
+      setUser(user);
+      setLoading(false);
     });
     return unsubscribe;
   }, []);
@@ -24,5 +25,5 @@ export function useAuth() {
     setUser(null);
   };
 
-  return { user, login, logout };
+  return { user, loading, login, logout };
 }

@@ -14,14 +14,15 @@ export default function BarberLoginPage() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const { user, login } = useAuth()
+  const { user, loading, login } = useAuth()
+  let isAuthenticated = false;
 
-  useEffect(() => {
-    if (!user) {
-      console.log("User is already logged in, redirecting to dashboard")
-      router.push('/barber-dashboard')
-    }
-  }, [user, router])
+  // useEffect(() => { // Convert user to a boolean
+  //   if (isAuthenticated) {
+  //     console.log("User is authenticated, redirecting to dashboard")
+  //     router.push('/barber-dashboard')
+  //   }
+  // }, [user, loading, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,6 +34,7 @@ export default function BarberLoginPage() {
       await login(email, password)
       console.log("Login successful, redirecting to dashboard")
       router.push('/barber-dashboard')
+      isAuthenticated = true;
     } catch (err) {
       console.error("Login failed:", err)
       setError('Failed to log in. Please check your credentials.')
@@ -41,8 +43,8 @@ export default function BarberLoginPage() {
     }
   }
 
-  if (user) {
-    return <Spinner /> // Show spinner while redirecting
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>
   }
 
   return (
@@ -55,23 +57,23 @@ export default function BarberLoginPage() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <Input 
-                id="email" 
-                name="email" 
-                type="email" 
-                required 
-                placeholder="Email address" 
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                required
+                placeholder="Email address"
                 className="mb-2"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
-              <Input 
-                id="password" 
-                name="password" 
-                type="password" 
-                required 
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                required
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
