@@ -1,0 +1,14 @@
+   /* styles.css */
+   .cancel-appointment-button {
+    float: right; /* Move the button to the right */
+    background-color: #f44336; /* Default background color */
+    color: white; /* Text color */
+    border: none; /* Remove border */
+    padding: 10px 20px; /* Add padding */
+    cursor: pointer; /* Change cursor to pointer */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+  }
+
+  .cancel-appointment-button:hover {
+    background-color: red; /* Change color to red on hover */
+  }
