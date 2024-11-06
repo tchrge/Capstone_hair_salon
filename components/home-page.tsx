@@ -25,7 +25,7 @@ export function HomePage() {
           </Link>
           <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
             Contact
-          </Link>  
+          </Link>
           <Link href="/customer-login" passHref>
             <Button variant="outline" size="sm" className="hidden sm:inline-flex">
               <UserCircle className="h-4 w-4 mr-2" />
@@ -94,21 +94,21 @@ export function HomePage() {
               <div className="flex flex-col items-center space-y-2 border p-4 rounded-lg">
                 <Star className="h-6 w-6 text-yellow-500" />
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                  "This CRM has transformed how I run my barbershop. I can't imagine working without it now!"
+                  &ldquo;This CRM has transformed how I run my barbershop. I can&quot;t imagine working without it now!&apos;
                 </p>
                 <p className="font-semibold">- John D., Master Barber</p>
               </div>
               <div className="flex flex-col items-center space-y-2 border p-4 rounded-lg">
                 <Star className="h-6 w-6 text-yellow-500" />
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                  "The scheduling feature alone has saved me hours each week. Highly recommended!"
+                  &ldquo;The scheduling feature alone has saved me hours each week. Highly recommended!&ldquo;
                 </p>
                 <p className="font-semibold">- Sarah L., Salon Owner</p>
               </div>
               <div className="flex flex-col items-center space-y-2 border p-4 rounded-lg">
                 <Star className="h-6 w-6 text-yellow-500" />
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                  "Customer support is top-notch. They're always there to help with any questions."
+                  &ldquo;Customer support is top-notch. They&apos;re always there to help with any questions.&ldquo;
                 </p>
                 <p className="font-semibold">- Mike R., Barber</p>
               </div>

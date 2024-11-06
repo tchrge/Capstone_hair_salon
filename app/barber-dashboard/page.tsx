@@ -8,14 +8,12 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { db } from "@/lib/firebase"
 import { collection, addDoc, getDocs, deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore"
-import { storage } from "@/lib/firebase"; 
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; 
 
-const mockAppointments = [
-  { id: 1, customerName: "John Doe", date: "2023-05-15", time: "10:00 AM" },
-  { id: 2, customerName: "Jane Smith", date: "2023-05-15", time: "2:00 PM" },
-  { id: 3, customerName: "Bob Johnson", date: "2023-05-16", time: "11:30 AM" },
-]
+// const mockAppointments = [
+//   { id: 1, customerName: "John Doe", date: "2023-05-15", time: "10:00 AM" },
+//   { id: 2, customerName: "Jane Smith", date: "2023-05-15", time: "2:00 PM" },
+//   { id: 3, customerName: "Bob Johnson", date: "2023-05-16", time: "11:30 AM" },
+// ]
 
 // Define the type for selectedAppointment
 type Appointment = { id: string; customerEmail: string };
@@ -80,7 +78,7 @@ export default function BarberDashboardPage() {
       if (!user) throw new Error("User not authenticated");
       if (!selectedFile) throw new Error("No file selected");
 
-      const docRef = await addDoc(collection(db, "promotions"), {
+      await addDoc(collection(db, "promotions"), {
         title: offerTitle,
         description: offerDescription,
         createdAt: new Date(),
@@ -103,8 +101,7 @@ export default function BarberDashboardPage() {
       setOfferTitle('');
       setOfferDescription('');
       setSelectedFile(null);
-    } catch (error: any) {
-      setErrorMessage(error.message);
+    } catch (error) {
       console.error("Error creating Instagram post: ", error);
     } finally {
       setLoading(false);
@@ -138,8 +135,8 @@ export default function BarberDashboardPage() {
     }
   };
 
-  const notifyUser = async (userEmail: string, appointmentData: any) => {
-    console.log(`Notifying ${userEmail} about the cancellation of appointment: ${appointmentData.title}`);
+  const notifyUser = async (userEmail: string, appointmentData: object) => {
+    console.log(`Notifying ${userEmail} about the cancellation of appointment: ${appointmentData}`);
   };
 
   const handleReschedule = async (appointmentId: string) => {
@@ -152,8 +149,7 @@ export default function BarberDashboardPage() {
       });
       console.log("Appointment rescheduled successfully.");
       setIsRescheduleModalOpen(false);
-    } catch (error: any) {
-      setErrorMessage("Error rescheduling appointment: " + error.message);
+    } catch (error) {
       console.error("Error rescheduling appointment: ", error);
     } finally {
       setLoading(false);
@@ -203,7 +199,7 @@ export default function BarberDashboardPage() {
               New Time:
               <input type="time" value={newTime} onChange={(e) => setNewTime(e.target.value)} required />
             </label>
-            <Button onClick={() => handleReschedule(selectedAppointment?.id!)}>Confirm Reschedule</Button>
+            <Button onClick={() => handleReschedule(selectedAppointment!.id!)}>Confirm Reschedule</Button>
             <Button onClick={() => setIsRescheduleModalOpen(false)}>Cancel</Button>
           </div>
         </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,8 +14,7 @@ export default function BarberLoginPage() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const { user, loading, login } = useAuth()
-  let isAuthenticated = false;
+  const { loading, login } = useAuth()
 
   // useEffect(() => { // Convert user to a boolean
   //   if (isAuthenticated) {
@@ -34,7 +33,6 @@ export default function BarberLoginPage() {
       await login(email, password)
       console.log("Login successful, redirecting to dashboard")
       router.push('/barber-dashboard')
-      isAuthenticated = true;
     } catch (err) {
       console.error("Login failed:", err)
       setError('Failed to log in. Please check your credentials.')
