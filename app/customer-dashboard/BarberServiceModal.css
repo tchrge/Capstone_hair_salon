@@ -1,0 +1,139 @@
+.modal {
+    position: relative;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 90%;
+    margin: auto;
+}
+
+.modal-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.service-list {
+    flex: 2;
+    margin-right: 20px;
+}
+
+.barber-card {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    margin-bottom: 15px;
+}
+
+.barber-name {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.services {
+    display: flex;
+    flex-direction: column;
+}
+
+.service-item {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.service-item:hover {
+    background-color: #f0f0f0;
+}
+
+.service-item.selected {
+    background-color: #007bff;
+    color: white;
+}
+
+.summary {
+    flex: 1;
+    max-width: 250px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.summary h3, .summary h4 {
+    margin-bottom: 10px;
+}
+
+.summary p {
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #007bff;
+}
+
+.close-button:hover {
+    color: #0056b3;
+}
+
+.time-selection {
+    flex: 1;
+    margin-right: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.time-list {
+    max-height: 320px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.time-item {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.time-item:hover {
+    background-color: #f0f0f0;
+}
+
+.time-item.selected {
+    background-color: #007bff;
+    color: white;
+}
+
+.confirm-button {
+    width: 100%;
+    background-color: black;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.confirm-button:hover {
+    background-color: #494847;
+}
