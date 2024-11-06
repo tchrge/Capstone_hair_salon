@@ -1,0 +1,52 @@
+/* pages/customer-login/CustomerLoginPage.module.css */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+    text-align: center;
+  }
+  
+  .title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .buttonContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between buttons */
+  }
+  
+  /* Use class names instead of the global button selector */
+  .googleButton,
+  .facebookButton {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: white;
+    transition: background-color 0.3s;
+  }
+  
+  .googleButton {
+    background-color: #4285f4; /* Google Blue */
+  }
+  
+  .googleButton:hover {
+    background-color: #357ae8; /* Darker Google Blue */
+  }
+  
+  .facebookButton {
+    background-color: #4267b2; /* Facebook Blue */
+  }
+  
+  .facebookButton:hover {
+    background-color: #365899; /* Darker Facebook Blue */
+  }
+  

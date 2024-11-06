@@ -1,0 +1,56 @@
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.serviceList {
+  list-style-type: none;
+  padding: 0;
+}
+
+.serviceItem {
+  padding: 15px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  cursor: pointer;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.serviceItem:hover {
+  background-color: #f0f0f0;
+}
+
+.selected {
+  background-color: #e0e0e0;
+  border-color: #333;
+}
+
+.serviceImage {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.confirmButton {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.confirmButton:hover {
+  background-color: #0056b3;
+}

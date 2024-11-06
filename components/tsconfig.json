@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+      "target": "es6", // Adjust based on your requirement
+      "module": "commonjs",
+      "strict": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "resolveJsonModule": true,
+      "jsx": "preserve", // Adjust if using React
+      "moduleResolution": "node",
+      "typeRoots": [
+        "./node_modules/@types", // Default type definitions
+        "./types" // Add your custom types directory here
+      ]
+    },
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+    "exclude": ["node_modules"]
+  }
+  
