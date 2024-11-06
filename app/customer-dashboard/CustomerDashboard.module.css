@@ -39,3 +39,26 @@
     margin: 5px 0;
   }
   
+  .modal {
+    position: fixed; /* Fixed positioning to cover the screen */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it appears above other content */
+  }
+  
+  .modalContent {
+    background: white; /* Modal background */
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%; /* Set width to 90% of the screen */
+    max-width: 90%; /* Ensure it doesn't exceed 90% */
+    max-height: 90%; /* Optional: limit height for larger screens */
+    overflow-y: auto; /* Allow scrolling if content exceeds height */
+  }
+  
