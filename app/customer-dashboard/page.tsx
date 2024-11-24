@@ -1,220 +1,329 @@
-// pages/customer-dashboard.tsx
-'use client'
-import React, { useState, useEffect } from 'react';
-import styles from './CustomerDashboard.module.css';
+'use client';
+
+import React from 'react';
+import { signOut } from 'firebase/auth';
+import { auth, db } from '../../lib/firebase';
+import { useRouter } from 'next/navigation';
+import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { collection, getDocs, Timestamp, query, where, orderBy } from 'firebase/firestore';
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import BarberServiceModal from './BarberServiceModal';
-import { db } from '../../lib/firebase'; // Adjust the path as necessary
-import { collection, addDoc, getDocs } from 'firebase/firestore';
-import { Timestamp } from 'firebase/firestore';
-import Slider from "react-slick"; // Import Slider from react-slick
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/Badge";
+import { Calendar, Clock, DollarSign, LogOut, Loader2, X } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import BarberServiceModal from './BarberServiceModal'; // Adjust the path as necessary
+import { Promotion } from '@/types/Promotion';
+import { BookingData } from '@/types/BookingData';
+import { Appointment } from '@/types/appoitnment';
 
-const CustomerDashboard = () => {
 
-  type Booking = {
-    id: string;
-    services: { name: string }[];
-    barber: string;
-    appointmentTime: Timestamp;
-    start: Timestamp;
-  };
+// Constants
+const APPOINTMENTS_PER_PAGE = 2;
+const queryClient = new QueryClient();
 
-  const [appointments, setAppointments] = useState<Booking[]>([]);
+// Components
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-[200px]">
+    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+  </div>
+);
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'appointments'));
-        const fetchedAppointments: Booking[] = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Booking[];
-        setAppointments(fetchedAppointments);
-      } catch (error) {
-        console.error("Error fetching appointments: ", error);
-      }
-    };
-
-    fetchAppointments();
-  }, []);
-
-  const currentTime = new Date(); // Use the current time as is
-  const upcomingBookings = appointments.filter(booking => {
-    const startTime = booking.start.toDate(); // Use the start time directly
-    console.log("Start Time:", startTime);
-    console.log("Current Time:", currentTime);
-    return startTime > currentTime; // Compare directly
-  });
-  const pastBookings = appointments.filter(booking => {
-    const startTime = booking.start.toDate(); // Use the start time directly
-    return startTime <= currentTime; // Compare directly
-  });
-
-  const BookingCard = ({ booking }: { booking: Booking }) => {
-    // Extract the names from the services object
-    const serviceValues = Object.values(booking.services)
-      .flat() // Flatten the array of objects
-      .map(service => service.name) // Map to get the 'name' property
-      .join(', '); // Join the names into a string
-    return (
-      <div className={styles.bookingCard}>
-        <h3><strong>Services Availed:</strong> {serviceValues}</h3> {/* Render the names as a comma-separated string */}
-        <p><strong>Barber:</strong> {booking.barber}</p>
-        <p><strong>Date:</strong> {booking.start.toDate().toString()}</p>
-      </div>
-    );
-  };
-
-  const handleLogout = () => {
-    // Logic for logging out the user
-    console.log("User logged out");
-  };
-
-  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedBarber, setSelectedBarber] = useState(null);
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
-
-  const handleBookAppointment = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleConfirmAppointment = async (appointmentData: {
-    barber: string;
-    services: string[];
-    appointmentTime: Date;
-    start: Date; // Assuming you have these values
-    end: Date;   // Assuming you have these values
-    totalCost: number; // Assuming you have this value
-  }) => {
-    // Ensure that the required fields are present
-    if (!appointmentData.barber || appointmentData.services.length === 0) {
-      setErrorMessage("Please select a barber and at least one service.");
-      return;
-    }
-
-    try {
-      // Save appointment data to Firestore
-      const docRef = await addDoc(collection(db, 'appointments'), appointmentData);
-      console.log("Appointment confirmed with ID: ", docRef.id);
-
-      // Reset the selected barber and services if needed
-      setSelectedBarber(null);
-      setSelectedServices([]);
-      setIsModalOpen(false); // Close the modal after confirming
-    } catch (error) {
-      console.error("Error adding document: ", error);
-      setErrorMessage("Failed to confirm appointment. Please try again.");
-    }
-  };
-
-  const [visibleBookings, setVisibleBookings] = useState(2); // Start with 2 visible bookings
-
-  const loadMoreBookings = () => {
-    setVisibleBookings(prev => prev + 4); // Load 4 more bookings
-  };
-
-  const displayedUpcomingBookings = upcomingBookings.slice(0, visibleBookings);
-  const displayedPastBookings = pastBookings.slice(0, visibleBookings);
-
-  const [promotions, setPromotions] = useState<any[]>([]); // State to hold promotions data
-
-  useEffect(() => {
-    const fetchPromotions = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'promotions'));
-        const fetchedPromotions = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setPromotions(fetchedPromotions);
-      } catch (error) {
-        console.error("Error fetching promotions: ", error);
-      }
-    };
-
-    fetchPromotions();
-  }, []);
-
+const AppointmentCard = ({ appointment }: { appointment: Appointment }) => {
+  console.log(appointment);
   return (
-    <div className="p-4 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Customer Dashboard</h1>
-        <Button onClick={handleLogout}>Log out</Button>
-      </div>
-
-      <p className="mb-6">Welcome back, Customer!</p>
-
-      <div className="mb-6"> {/* Promotions Section */}
-        <h2 className="text-xl font-bold mb-4">Promotions</h2>
-        <Slider 
-          dots={true} 
-          infinite={true} 
-          speed={500} 
-          slidesToShow={3} 
-          slidesToScroll={1} 
-          autoplay={true}  
-          autoplaySpeed={2000}  
-        >
-          {promotions.map(promotion => (
-            <div key={promotion.id} className="border p-4 rounded-lg w-[250px] mx-4"> {/* Fixed width and margin */}
-              <h3 className="font-semibold">{promotion.title}</h3>
-              <p>{promotion.description}</p>
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-gray-500" />
+              <span>{appointment.start.toDate().toLocaleDateString()}</span>
             </div>
-          ))}
-        </Slider>
-      </div>
-
-      <div className="flex justify-end mb-6"> {/* Flex container to align button to the right */}
-        <Button onClick={handleBookAppointment}>Book Appointment</Button>
-      </div>
-
-      <div className={styles.section}>
-        <h2 className="text-xl font-bold mb-4">Upcoming Bookings</h2>
-        <div className="space-y-4">
-          {displayedUpcomingBookings.map((booking) => (
-            <div key={booking.id} className="border p-4 rounded-lg">
-              <BookingCard booking={booking} />
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-gray-500" />
+              <span>{appointment.start.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
-          ))}
-        </div>
-        {displayedUpcomingBookings.length < upcomingBookings.length && (
-          <div className="flex justify-center mt-4">
-            <Button onClick={loadMoreBookings}>Show More</Button>
           </div>
-        )}
-      </div>
-
-      <div className={styles.section}>
-      <h2 className="text-xl font-bold mb-4">Past Bookings</h2>
-        <div className="space-y-4">
-          {displayedPastBookings.map((booking) => (
-            <div key={booking.id} className="border p-4 rounded-lg">
-              <BookingCard booking={booking} />
-            </div>
-          ))}
+          <Badge
+            variant={appointment.status === 'active' ? 'default' : 'destructive'}
+            className="capitalize"
+          >
+            {appointment.status}
+          </Badge>
         </div>
-        {displayedPastBookings.length < pastBookings.length && (
-          <div className="flex justify-center mt-4">
-            <Button onClick={loadMoreBookings}>Show More</Button>
-          </div>
-        )}
-      </div>
-
-      {isModalOpen && (
-        <div className={styles.modal}> {/* Backdrop */}
-          <div className={styles.modalContent}> {/* Modal content */}
-            <BarberServiceModal
-              onClose={() => setIsModalOpen(false)}
-              onSelectBarber={setSelectedBarber}
-              onSelectServices={setSelectedServices}
-              onConfirmAppointment={handleConfirmAppointment}
-            />
-          </div>
+        <p className="font-medium">Barber: {appointment.barber}</p>
+        <div className="mt-2">
+          <p className="text-sm text-gray-600">Services:</p>
+          <ul className="list-disc list-inside">
+            {Array.isArray(appointment.services) ? (
+              appointment.services.map((service, index) => (
+                <li key={index} className="text-sm">
+                  {service.name}
+                </li>
+              ))
+            ) : (
+              <li className="text-sm text-gray-500">No services available</li>
+            )}
+          </ul>
         </div>
-      )}
-    </div>
+        <div className="mt-4 pt-4 border-t">
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-blue-600 hover:underline"
+          >
+            View Appointment Details
+          </a>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
-export default CustomerDashboard;
+const PromotionCarousel = ({ promotions }: { promotions: Promotion[] }) => (
+  <section className="mb-12">
+    <h2 className="text-xl font-semibold mb-6">Current Promotions</h2>
+    <Carousel className="w-full">
+      <CarouselContent>
+        {promotions.map(promotion => (
+          <CarouselItem key={promotion.id} className="md:basis-1/2 lg:basis-1/3">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex flex-col h-full">
+                  {promotion.imageUrl && (
+                    <div className="relative w-full h-40 mb-4 overflow-hidden rounded-lg">
+                      <img
+                        src={promotion.imageUrl}
+                        alt={promotion.title}
+                        className="object-cover w-full h-full transition-transform hover:scale-105"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">{promotion.title}</h3>
+                    <p className="text-gray-600 mb-4">{promotion.description}</p>
+                    <div className="flex items-center justify-between mt-auto">
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <DollarSign className="w-4 h-4" />
+                        {promotion.discount}% OFF
+                      </Badge>
+                      <span className="text-sm text-gray-500">
+                        Valid until {promotion.validUntil.toDate().toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <CarouselPrevious />
+      <CarouselNext />
+    </Carousel>
+  </section>
+);
+
+function CustomerDashboard() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [upcomingPage, setUpcomingPage] = React.useState(1);
+  const [pastPage, setPastPage] = React.useState(1);
+  const [isBarberServiceModalOpen, setIsBarberServiceModalOpen] = React.useState(false);
+
+  const { data: appointments = [], isLoading: appointmentsLoading } = useQuery({
+    queryKey: ['appointments'],
+    queryFn: async () => {
+      const appointmentsQuery = query(
+        collection(db, 'appointments'),
+        orderBy('start', 'desc')
+      );
+      const snapshot = await getDocs(appointmentsQuery);
+      return snapshot.docs.map(doc => ({
+        ...doc.data()
+      })) as Appointment[];
+    }
+  });
+
+  const { data: promotions = [], isLoading: promotionsLoading } = useQuery({
+    queryKey: ['promotions'],
+    queryFn: async () => {
+      const now = Timestamp.fromDate(new Date());
+      const promotionsQuery = query(
+        collection(db, 'promotions'),
+        where('validUntil', '>', now),
+        orderBy('validUntil')
+      );
+      const snapshot = await getDocs(promotionsQuery);
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Promotion[];
+    }
+  });
+
+  const now = new Date();
+  const upcomingAppointments = React.useMemo(() =>
+    appointments
+      .filter(app => app.start.toDate() > now && app.status === 'active')
+      .sort((a, b) => a.start.toDate().getTime() - b.start.toDate().getTime()),
+    [appointments, now]
+  );
+
+  const pastAppointments = React.useMemo(() =>
+    appointments
+      .filter(app => app.start.toDate() <= now || app.status === 'canceled')
+      .sort((a, b) => b.start.toDate().getTime() - a.start.toDate().getTime()),
+    [appointments, now]
+  );
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/login');
+      toast({
+        title: "Logged out successfully",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Error logging out",
+        description: "Please try again",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
+  };
+
+  const onBookAppointment = async (bookingData: Appointment) => {
+    // API call to create an appointment in your system
+    try {
+      // Your logic to save the booking data
+      toast({
+        title: "Appointment booked successfully",
+        description: `Your appointment with ${bookingData.barber} is confirmed`,
+      });
+    } catch (error) {
+      console.error('Error booking appointment:', error);
+      toast({
+        title: "Error booking appointment",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (appointmentsLoading || promotionsLoading) {
+    return <LoadingSpinner />;
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold">Customer Dashboard</h1>
+        <div className="flex gap-4">
+          <Button onClick={() => setIsBarberServiceModalOpen(true)}>Book Appointment</Button>
+          <Button
+            variant="outline"
+            onClick={handleLogout}
+            className="flex items-center gap-2"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </Button>
+        </div>
+      </div>
+
+      {promotions.length > 0 && (
+        <PromotionCarousel promotions={promotions} />
+      )}
+
+      <section className="mb-12">
+        <h2 className="text-xl font-semibold mb-6">Upcoming Appointments</h2>
+        {upcomingAppointments.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {upcomingAppointments
+                .slice(0, upcomingPage * APPOINTMENTS_PER_PAGE)
+                .map(appointment => (
+                  <AppointmentCard key={String(appointment.id)} appointment={appointment} />
+                ))}
+            </div>
+            {upcomingAppointments.length > upcomingPage * APPOINTMENTS_PER_PAGE && (
+              <div className="mt-6 text-center">
+                <Button
+                  variant="outline"
+                  onClick={() => setUpcomingPage(p => p + 1)}
+                >
+                  Show More
+                </Button>
+              </div>
+            )}
+          </>
+        ) : (
+          <Card>
+            <CardContent className="p-6 text-center text-gray-500">
+              No upcoming appointments. Book your next appointment now!
+            </CardContent>
+          </Card>
+        )}
+      </section>
+
+      <section>
+        <h2 className="text-xl font-semibold mb-6">Past Appointments</h2>
+        {pastAppointments.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {pastAppointments
+                .slice(0, pastPage * APPOINTMENTS_PER_PAGE)
+                .map(appointment => (
+                  <AppointmentCard key={String(appointment.id)} appointment={appointment} />
+                ))}
+            </div>
+            {pastAppointments.length > pastPage * APPOINTMENTS_PER_PAGE && (
+              <div className="mt-6 text-center">
+                <Button
+                  variant="outline"
+                  onClick={() => setPastPage(p => p + 1)}
+                >
+                  Show More
+                </Button>
+              </div>
+            )}
+          </>
+        ) : (
+          <Card>
+            <CardContent className="p-6 text-center text-gray-500">
+              No past appointments found.
+            </CardContent>
+          </Card>
+        )}
+      </section>
+
+      <BarberServiceModal
+        isOpen={isBarberServiceModalOpen}
+        onClose={() => setIsBarberServiceModalOpen(false)}
+        onBookAppointment={async (bookingData: Appointment) => {
+          await onBookAppointment(bookingData);
+        }}
+      />
+    </div>
+  );
+}
+
+export default function CustomerDashboardWrapper() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <CustomerDashboard />
+    </QueryClientProvider>
+  );
+}
